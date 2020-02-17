@@ -83,7 +83,7 @@ Run_J = function(x,mu,sd)
 	}
 	#print(f(1))
 	ise = cubintegrate(f,lower = max(-5,min(z$x)), upper = min(5,max(z$x)))$integral
-	print(ise)
+	#print(ise)
 	return(ise)
 }
 
@@ -99,8 +99,81 @@ Imse_J = function(iter=1000,n=100,mu =0 , sd =1)
 		return(Run_J(x,mu,sd))
 	}
 	res=lapply(z,f)
-	print(res)
+	#print(res)
 	return(Reduce('+',res)/iter)
 
 }
-print(Imse_J(iter =30))
+
+Run_J_tilde = function(x,mu,sd)
+{
+	fun = function(h)
+	{
+		return(J_tilde(h,x))
+	}
+	#print(fun(0.5))
+	n=length(x)
+	h_J = optim(0.5,fun,method ="Brent",lower =0 , upper =10*n^(-1/5))$par
+	#print(h_J)
+	z= density(x,bw = h_J , kernel ="gaussian")
+	df = approxfun(z)
+	f = function(x)
+	{
+		return((df(x)-dnorm(x,mu,sd))^2)
+	}
+	#print(f(1))
+	ise = cubintegrate(f,lower = max(-5,min(z$x)), upper = min(5,max(z$x)))$integral
+	#print(ise)
+	return(ise)
+}
+Imse_J_tilde = function(iter=1000,n=100,mu =0 , sd =1)
+{
+	x = rep(n,iter)
+	#print(x[1])
+	f = function(x) return(rnorm(x,mean = mu,sd = sd))
+	z= lapply(as.list(x),f)
+	#print(z[[1]])
+	f = function(x)
+	{
+		return(Run_J_tilde(x,mu,sd))
+	}
+	res=lapply(z,f)
+	#print(res)
+	return(Reduce('+',res)/iter)
+}
+Run_J_star = function(x,mu,sd)
+{
+	fun = function(h)
+	{
+		return(J_star(h,x))
+	}
+	#print(fun(0.5))
+	n=length(x)
+	h_J = optim(0.5,fun,method ="Brent",lower =0 , upper =10*n^(-1/5))$par
+	#print(h_J)
+	z= density(x,bw = h_J , kernel ="gaussian")
+	df = approxfun(z)
+	f = function(x)
+	{
+		return((df(x)-dnorm(x,mu,sd))^2)
+	}
+	#print(f(1))
+	ise = cubintegrate(f,lower = max(-5,min(z$x)), upper = min(5,max(z$x)))$integral
+	#print(ise)
+	return(ise)
+}
+Imse_J_star = function(iter=1000,n=100,mu =0 , sd =1)
+{
+	x = rep(n,iter)
+	#print(x[1])
+	f = function(x) return(rnorm(x,mean = mu,sd = sd))
+	z= lapply(as.list(x),f)
+	#print(z[[1]])
+	f = function(x)
+	{
+		return(Run_J_star(x,mu,sd))
+	}
+	res=lapply(z,f)
+	#print(res)
+	return(Reduce('+',res)/iter)
+}
+print(Imse_J_star(iter =30))
